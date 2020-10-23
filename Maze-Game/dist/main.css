@@ -1,16 +1,28 @@
-#mazeContainer {
-  height: 100%;
+body {
   width: 100%;
+  height: 100%;
+}
+
+#mazeContainer {
+  position: relative;
+  margin: auto;
+  width: 100%;
+  height: 100%;
 }
 #mazeContainer table {
+  margin: auto;
+  width: 90vmin;
+  height: 90vmin;
+  position: relative;
   border-collapse: collapse;
+  border-spacing: 0;
+  white-space: normal;
+  border: 3px solid black;
 }
-#mazeContainer table,
-#mazeContainer td {
-  border: 1px solid black;
+#mazeContainer tbody {
+  vertical-align: middle;
 }
 #mazeContainer td {
+  border: 2px solid black;
   color: black;
-  height: 30px;
-  width: 30px;
 }
