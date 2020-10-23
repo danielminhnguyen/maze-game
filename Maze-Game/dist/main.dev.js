@@ -2,20 +2,25 @@
 
 //Build random Maze
 //Inspire from
-//https://medium.com/swlh/how-to-create-a-maze-with-javascript-36f3ad8eebc1
+//#region Maze Generator
 // Variables
-var width = 15; //Canvas width
+var width = 10; //Canvas width
 
-var height = 15; // Canvas height
+var height = 10; // Canvas height
 
-mazeColor = "";
-startPos = [height, height];
-endPos = [width, 1];
+var startPos = [1, height];
+var endPos = [width, 1];
 var color = {
   startCell: "green",
   finishCell: "purple",
-  mazeBackground: "white"
+  mazeBackground: "white",
+  path: "red"
 };
+
+var $ = function $(id) {
+  return document.getElementById(id);
+}; //#region  Functions
+
 
 function createTable(w, h) {
   mazeWidth = w;
@@ -28,17 +33,6 @@ function createTable(w, h) {
 
     for (var row = 1; row <= mazeWidth; row++) {
       var mazeColumn = document.createElement("td");
-
-      if (row == startPos[0] && col == startPos[1]) {
-        // set starting cell color
-        mazeColumn.style.backgroundColor = color.startCell;
-      } else if (row == endPos[0] && col == endPos[1]) {
-        // set finish cell color
-        mazeColumn.style.backgroundColor = color.finishCell;
-      } else {
-        mazeColumn.style.backgroundColor = color.mazeBackground;
-      }
-
       mazeColumn.setAttribute("id", "cell_".concat(row, "_").concat(col));
       mazeRow.appendChild(mazeColumn);
     }
@@ -47,7 +41,9 @@ function createTable(w, h) {
   }
 
   mazeTable.appendChild(mazeBody);
-  document.getElementById("mazeContainer").appendChild(mazeTable);
+  $("mazeContainer").appendChild(mazeTable);
+  $("cell_".concat(startPos[0], "_").concat(startPos[1])).style.backgroundColor = color.startCell;
+  $("cell_".concat(endPos[0], "_").concat(endPos[1])).style.backgroundColor = color.finishCell;
 } // Fisher–Yates Shuffle https://bost.ocks.org/mike/shuffle/
 
 
@@ -67,7 +63,9 @@ function shuffle(array) {
   }
 
   return array;
-}
+} //#endregion End Function
+//#region  Objects
+
 
 var player = {
   start: function start() {
@@ -81,7 +79,6 @@ var player = {
 var exit = {
   direction: null,
   validExit: ["left", "right", "top", "bottom"],
-  availablePath: [],
   path: [],
   solution: [],
   found: false,
@@ -139,62 +136,68 @@ var currentCell = {
   checkNeighbour: function checkNeighbour() {
     this.validNeighbour = []; //   Top
 
-    nextCell = document.getElementById("cell_".concat(currentCell.positionX, "_").concat(currentCell.positionY - 1));
+    nextCell = $("cell_".concat(currentCell.positionX, "_").concat(currentCell.positionY - 1));
 
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("top");
     } //  Bottom
 
 
-    nextCell = document.getElementById("cell_".concat(currentCell.positionX, "_").concat(currentCell.positionY + 1));
+    nextCell = $("cell_".concat(currentCell.positionX, "_").concat(currentCell.positionY + 1));
 
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("bottom");
     } // Right
 
 
-    nextCell = document.getElementById("cell_".concat(currentCell.positionX + 1, "_").concat(currentCell.positionY));
+    nextCell = $("cell_".concat(currentCell.positionX + 1, "_").concat(currentCell.positionY));
 
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("right");
     } // Left
 
 
-    nextCell = document.getElementById("cell_".concat(currentCell.positionX - 1, "_").concat(currentCell.positionY));
+    nextCell = $("cell_".concat(currentCell.positionX - 1, "_").concat(currentCell.positionY));
 
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("left");
     }
   },
   id: function id() {
     return "cell_".concat(currentCell.positionX, "_").concat(currentCell.positionY);
   }
-}; //  Creat blank table
+}; //#endregion Object
+//  Creat blank table
 
 createTable(width, height);
 player.start(); //  Shortest path to the destination
-
-var xmin = endPos[0] - startPos[0];
-var ymin = endPos[1] - startPos[1]; // Vertical distance
-
-xmin >= 0 ? exit.direction = "right" : exit.direction = "left";
-exit.availablePath = exit.availablePath.concat(Array(Math.abs(xmin)).fill(exit.direction)); // Horizontal distance
-
-ymin >= 0 ? exit.direction = "bottom" : exit.direction = "top";
-exit.availablePath = exit.availablePath.concat(Array(Math.abs(ymin)).fill(exit.direction)); // Randomize exitpath
-
-exit.availablePath = shuffle(exit.availablePath); // initiate starting point
+// let xmin = endPos[0] - startPos[0];
+// let ymin = endPos[1] - startPos[1];
+// Vertical distance
+// xmin >= 0 ? (exit.direction = "right") : (exit.direction = "left");
+// exit.availablePath = exit.availablePath.concat(Array(Math.abs(xmin)).fill(exit.direction));
+// // Horizontal distance
+// ymin >= 0 ? (exit.direction = "bottom") : (exit.direction = "top");
+// exit.availablePath = exit.availablePath.concat(Array(Math.abs(ymin)).fill(exit.direction));
+// // Randomize exitpath
+// exit.availablePath = shuffle(exit.availablePath);
+// initiate starting point
 
 currentCell.positionX = startPos[0];
 currentCell.positionY = startPos[1];
-a = document.getElementById(currentCell.id());
-a.style.backgroundColor = "red";
+$(currentCell.id()).classList.add("visited");
 exit.path.push([currentCell.positionX, currentCell.positionY]); // current correct cell
 
 exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited cell
 
-for (i = 0; i <= width * height - 2; i++) {
-  if (i != exit.visited.length) {} //  Check avaiable direction from current cell
+for (i = 0; i <= width * height; i++) {
+  // Notify when exit found
+  if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
+    exit.solution = exit.path.slice(); //Make copy of the exit path
+
+    exit.found = true;
+    console.log("Exit Found");
+  } //  Check avaiable direction from current cell
 
 
   currentCell.checkNeighbour(); //   action when reach dead end
@@ -216,61 +219,35 @@ for (i = 0; i <= width * height - 2; i++) {
     }
   } else {
     //   Filter avaiable direction of current cell for exit Path)
-    var filterPath = exit.availablePath.filter(function (f) {
-      return currentCell.validNeighbour.includes(f);
-    }); // Check for direction
+    // Check for direction
+    randomPick = Math.floor(Math.random() * currentCell.validNeighbour.length); //Pick random an exit from the
 
-    randomPick = Math.floor(Math.random() * filterPath.length); //Pick random an exit from the
-
-    exit.direction = filterPath[randomPick]; // when weight direction doesn't include the path
+    exit.direction = currentCell.validNeighbour[randomPick]; // when weight direction doesn't include the path
 
     if (exit.direction == undefined) {
       exit.direction = currentCell.validNeighbour[0];
-    }
-
-    exit.availablePath.push(exit.directionOpposite(exit.direction)); //Add opposite direction to keep balance
-    //Remove 1st available move from path
-
-    exit.availablePath.splice(exit.availablePath.indexOf(exit.direction), 1); // Notify when exit found
-
-    if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
-      exit.solution = exit.path.slice();
-      console.log("Exit Found");
-    } // break the wall in front
+    } else {
+      a = document.getElementById(currentCell.id());
+      a.style["border-".concat(exit.direction)] = "none";
+    } //  Continue to create deadend
 
 
-    a = document.getElementById(currentCell.id());
-    a.style["border-".concat(exit.direction)] = "none";
-    currentCell.move(exit.direction); // Implement into Object
-    // switch (exit.direction) {
-    //   //   Every move will add another opposite direction to the mix
-    //   case "right":
-    //     currentCell.positionX++;
-    //     exit.fullPath.push("left");
-    //     break;
-    //   case "left":
-    //     currentCell.positionX--;
-    //     exit.fullPath.push("right");
-    //     break;
-    //   case "top":
-    //     currentCell.positionY--;
-    //     exit.fullPath.push("bottom");
-    //     break;
-    //   case "bottom":
-    //     currentCell.positionY++;
-    //     exit.fullPath.push("top");
-    //     break;
-    // }
+    exit.path.push([currentCell.positionX, currentCell.positionY]); // solution array
+    // break the wall in front
 
-    exit.path.push([currentCell.positionX, currentCell.positionY]); // solution cells
+    currentCell.move(exit.direction); //Move following direction
 
-    exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited cell
+    exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited array
 
     a = document.getElementById(currentCell.id());
-    a.style.backgroundColor = "red";
+    a.classList.add("visited");
     a.style["border-".concat(exit.directionOpposite())] = "none"; //break the wall behind
   }
 }
 
-document.getElementById("cell_".concat(startPos[0], "_").concat(startPos[0])).style.backgroundColor = color.startCell;
-document.getElementById("cell_".concat(endPos[0], "_").concat(endPos[0])).style.backgroundColor = color.finishCell;
+exit.solution.forEach(function (a) {
+  $("cell_".concat(a[0], "_").concat(a[1])).style.backgroundColor = color.path;
+});
+$("cell_".concat(startPos[0], "_").concat(startPos[1])).style.backgroundColor = color.startCell;
+$("cell_".concat(endPos[0], "_").concat(endPos[1])).style.backgroundColor = color.finishCell; //#endregion  End MAZE GENERATOR
+//  check exit.found false then re run the program

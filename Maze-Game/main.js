@@ -1,19 +1,24 @@
 //Build random Maze
 //Inspire from
-//https://medium.com/swlh/how-to-create-a-maze-with-javascript-36f3ad8eebc1
+
+//#region Maze Generator
 
 // Variables
-let width = 15; //Canvas width
-let height = 15; // Canvas height
-mazeColor = "";
-startPos = [height, height];
-endPos = [width, 1];
+let width = 10; //Canvas width
+let height = 10; // Canvas height
+let startPos = [1, height];
+let endPos = [width, 1];
 const color = {
   startCell: "green",
   finishCell: "purple",
   mazeBackground: "white",
+  path: "red",
+};
+var $ = function (id) {
+  return document.getElementById(id);
 };
 
+//#region  Functions
 function createTable(w, h) {
   mazeWidth = w;
   mazeHeight = h;
@@ -23,22 +28,15 @@ function createTable(w, h) {
     var mazeRow = document.createElement("tr");
     for (let row = 1; row <= mazeWidth; row++) {
       var mazeColumn = document.createElement("td");
-      if (row == startPos[0] && col == startPos[1]) {
-        // set starting cell color
-        mazeColumn.style.backgroundColor = color.startCell;
-      } else if (row == endPos[0] && col == endPos[1]) {
-        // set finish cell color
-        mazeColumn.style.backgroundColor = color.finishCell;
-      } else {
-        mazeColumn.style.backgroundColor = color.mazeBackground;
-      }
       mazeColumn.setAttribute("id", `cell_${row}_${col}`);
       mazeRow.appendChild(mazeColumn);
     }
     mazeBody.appendChild(mazeRow);
   }
   mazeTable.appendChild(mazeBody);
-  document.getElementById("mazeContainer").appendChild(mazeTable);
+  $("mazeContainer").appendChild(mazeTable);
+  $(`cell_${startPos[0]}_${startPos[1]}`).style.backgroundColor = color.startCell;
+  $(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
 }
 
 // Fisher–Yates Shuffle https://bost.ocks.org/mike/shuffle/
@@ -62,6 +60,9 @@ function shuffle(array) {
   return array;
 }
 
+//#endregion End Function
+
+//#region  Objects
 let player = {
   start: function () {
     this.positionX = startPos[0];
@@ -76,7 +77,6 @@ let player = {
 let exit = {
   direction: null,
   validExit: ["left", "right", "top", "bottom"],
-  availablePath: [],
   path: [],
   solution: [],
   found: false,
@@ -128,31 +128,24 @@ let currentCell = {
   checkNeighbour: function () {
     this.validNeighbour = [];
     //   Top
-    nextCell = document.getElementById(
-      `cell_${currentCell.positionX}_${currentCell.positionY - 1}`
-    );
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    nextCell = $(`cell_${currentCell.positionX}_${currentCell.positionY - 1}`);
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("top");
     }
     //  Bottom
-    nextCell = document.getElementById(
-      `cell_${currentCell.positionX}_${currentCell.positionY + 1}`
-    );
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    nextCell = $(`cell_${currentCell.positionX}_${currentCell.positionY + 1}`);
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("bottom");
     }
     // Right
-    nextCell = document.getElementById(
-      `cell_${currentCell.positionX + 1}_${currentCell.positionY}`
-    );
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    nextCell = $(`cell_${currentCell.positionX + 1}_${currentCell.positionY}`);
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("right");
     }
     // Left
-    nextCell = document.getElementById(
-      `cell_${currentCell.positionX - 1}_${currentCell.positionY}`
-    );
-    if (nextCell != null && nextCell.style.backgroundColor != "red") {
+    nextCell = $(`cell_${currentCell.positionX - 1}_${currentCell.positionY}`);
+
+    if (nextCell != null && nextCell.classList.contains("visited") == false) {
       this.validNeighbour.push("left");
     }
   },
@@ -161,33 +154,40 @@ let currentCell = {
   },
 };
 
+//#endregion Object
+
 //  Creat blank table
 createTable(width, height);
 player.start();
 
 //  Shortest path to the destination
-let xmin = endPos[0] - startPos[0];
-let ymin = endPos[1] - startPos[1];
+// let xmin = endPos[0] - startPos[0];
+// let ymin = endPos[1] - startPos[1];
 
 // Vertical distance
-xmin >= 0 ? (exit.direction = "right") : (exit.direction = "left");
-exit.availablePath = exit.availablePath.concat(Array(Math.abs(xmin)).fill(exit.direction));
-// Horizontal distance
-ymin >= 0 ? (exit.direction = "bottom") : (exit.direction = "top");
-exit.availablePath = exit.availablePath.concat(Array(Math.abs(ymin)).fill(exit.direction));
-// Randomize exitpath
-exit.availablePath = shuffle(exit.availablePath);
+// xmin >= 0 ? (exit.direction = "right") : (exit.direction = "left");
+// exit.availablePath = exit.availablePath.concat(Array(Math.abs(xmin)).fill(exit.direction));
+// // Horizontal distance
+// ymin >= 0 ? (exit.direction = "bottom") : (exit.direction = "top");
+// exit.availablePath = exit.availablePath.concat(Array(Math.abs(ymin)).fill(exit.direction));
+// // Randomize exitpath
+// exit.availablePath = shuffle(exit.availablePath);
 
 // initiate starting point
 currentCell.positionX = startPos[0];
 currentCell.positionY = startPos[1];
-a = document.getElementById(currentCell.id());
-a.style.backgroundColor = "red";
+
+$(currentCell.id()).classList.add("visited");
+
 exit.path.push([currentCell.positionX, currentCell.positionY]); // current correct cell
 exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited cell
 
-for (i = 0; i <= width * height - 2; i++) {
-  if (i != exit.visited.length) {
+for (i = 0; i <= width * height; i++) {
+  // Notify when exit found
+  if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
+    exit.solution = exit.path.slice(); //Make copy of the exit path
+    exit.found = true;
+    console.log("Exit Found");
   }
   //  Check avaiable direction from current cell
   currentCell.checkNeighbour();
@@ -209,61 +209,39 @@ for (i = 0; i <= width * height - 2; i++) {
     }
   } else {
     //   Filter avaiable direction of current cell for exit Path)
-    let filterPath = exit.availablePath.filter((f) => currentCell.validNeighbour.includes(f));
+
     // Check for direction
-    randomPick = Math.floor(Math.random() * filterPath.length); //Pick random an exit from the
-    exit.direction = filterPath[randomPick];
+    randomPick = Math.floor(Math.random() * currentCell.validNeighbour.length); //Pick random an exit from the
+    exit.direction = currentCell.validNeighbour[randomPick];
     // when weight direction doesn't include the path
     if (exit.direction == undefined) {
       exit.direction = currentCell.validNeighbour[0];
+    } else {
+      a = document.getElementById(currentCell.id());
+      a.style[`border-${exit.direction}`] = "none";
     }
-    exit.availablePath.push(exit.directionOpposite(exit.direction)); //Add opposite direction to keep balance
 
-    //Remove 1st available move from path
-    exit.availablePath.splice(exit.availablePath.indexOf(exit.direction), 1);
+    //  Continue to create deadend
 
-    // Notify when exit found
-    if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
-      exit.solution = exit.path.slice();
-      console.log("Exit Found");
-    }
+    exit.path.push([currentCell.positionX, currentCell.positionY]); // solution array
 
     // break the wall in front
-    a = document.getElementById(currentCell.id());
-    a.style[`border-${exit.direction}`] = "none";
 
-    currentCell.move(exit.direction);
+    currentCell.move(exit.direction); //Move following direction
 
-    // Implement into Object
-    // switch (exit.direction) {
-    //   //   Every move will add another opposite direction to the mix
-    //   case "right":
-    //     currentCell.positionX++;
-    //     exit.fullPath.push("left");
-    //     break;
-    //   case "left":
-    //     currentCell.positionX--;
-    //     exit.fullPath.push("right");
-    //     break;
-    //   case "top":
-    //     currentCell.positionY--;
-    //     exit.fullPath.push("bottom");
-    //     break;
-    //   case "bottom":
-    //     currentCell.positionY++;
-    //     exit.fullPath.push("top");
-    //     break;
-    // }
-
-    exit.path.push([currentCell.positionX, currentCell.positionY]); // solution cells
-    exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited cell
+    exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited array
 
     a = document.getElementById(currentCell.id());
-    a.style.backgroundColor = "red";
+    a.classList.add("visited");
     a.style[`border-${exit.directionOpposite()}`] = "none"; //break the wall behind
   }
 }
+exit.solution.forEach((a) => {
+  $(`cell_${a[0]}_${a[1]}`).style.backgroundColor = color.path;
+});
 
-document.getElementById(`cell_${startPos[0]}_${startPos[0]}`).style.backgroundColor =
-  color.startCell;
-document.getElementById(`cell_${endPos[0]}_${endPos[0]}`).style.backgroundColor = color.finishCell;
+$(`cell_${startPos[0]}_${startPos[1]}`).style.backgroundColor = color.startCell;
+$(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
+
+//#endregion  End MAZE GENERATOR
+//  check exit.found false then re run the program
