@@ -1,0 +1,16 @@
+#mazeContainer {
+  height: 100%;
+  width: 100%;
+}
+#mazeContainer table {
+  border-collapse: collapse;
+}
+#mazeContainer table,
+#mazeContainer td {
+  border: 1px solid black;
+}
+#mazeContainer td {
+  color: black;
+  height: 30px;
+  width: 30px;
+}
