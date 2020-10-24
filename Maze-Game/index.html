@@ -5,12 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://kit.fontawesome.com/7f6299d5ea.js" crossorigin="anonymous"></script>
 
-    <title>Document</title>
+    <title>Maze Runner</title>
     <link rel="stylesheet" href=".\dist\main.css" />
   </head>
   <body>
     <div class="control">
-      <button class="button1" onclick="play()">Play again</button>
+      <select name="" id="mode">
+        <option value="Easy"></option>
+        <option value="Medium"></option>
+        <option value="Hard"></option>
+        <option value="Insane"></option>
+      </select>
+      <button class="button1" onclick="play()">Play</button>
     </div>
     <br />
     <div id="mazeContainer"></div>

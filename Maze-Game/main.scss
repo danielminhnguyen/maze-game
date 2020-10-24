@@ -1,5 +1,6 @@
 * {
   margin: 0;
+  box-sizing: border-box;
 }
 body {
   width: 100%;
@@ -18,24 +19,25 @@ body {
     border-collapse: collapse;
     border-spacing: 0;
     white-space: normal;
-    border: 4px solid black;
+    border: 0.5em solid black;
   }
   tbody {
     position: relative;
     vertical-align: middle;
   }
   td {
-    border: 2px solid black;
+    border: 0.3em solid black;
     position: relative;
     color: black;
     text-align: center;
     vertical-align: middle;
     padding: 0;
-
     i {
-      position: relative;
-      margin: 0;
-      padding: 0;
+      font-size: 2em;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
   }
 }

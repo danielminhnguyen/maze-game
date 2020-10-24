@@ -5,9 +5,9 @@
 //
 //#region Maze Generator
 // Variables
-var width = 10; //Canvas width
+var width = 5; //Canvas width
 
-var height = 10; // Canvas height
+var height = 5; // Canvas height
 
 var startPos = [1, height];
 var endPos = [width, 1];
@@ -27,8 +27,12 @@ var rightPressed = false;
 var leftPressed = false;
 var upPressed = false;
 var downPressed = false;
-var interval = 1; // var KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
-//#region  Functions
+var refresh = 200;
+var playerInput; // var KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
+// Event listener
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false); //#region  Functions
 
 function keyDownHandler(e) {
   if ("code" in e) {
@@ -135,6 +139,7 @@ function keyUpHandler(e) {
 }
 
 function createTable(w, h) {
+  $("mazeContainer").innerHTML = "";
   mazeWidth = w;
   mazeHeight = h;
   var mazeTable = document.createElement("table");
@@ -158,37 +163,15 @@ function createTable(w, h) {
   $("mazeContainer").appendChild(mazeTable);
   $("cell_".concat(startPos[0], "_").concat(startPos[1])).style.backgroundColor = color.startCell;
   $("cell_".concat(endPos[0], "_").concat(endPos[1])).style.backgroundColor = color.finishCell;
-} // Fisher–Yates Shuffle https://bost.ocks.org/mike/shuffle/
-
-
-function shuffle(array) {
-  var currentIndex = array.length,
-      temporaryValue,
-      randomIndex; // While there remain elements to shuffle...
-
-  while (0 !== currentIndex) {
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1; // And swap it with the current element.
-
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
 }
 
 function buildMaze() {
   currentCell.positionX = startPos[0];
   currentCell.positionY = startPos[1];
-  $(currentCell.id()).classList.add("visited"); // exit.path.push([currentCell.positionX, currentCell.positionY]); // current correct cell
-
+  $(currentCell.id()).classList.add("visited");
   exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited cell
 
   for (i = 0; i <= width * height; i++) {
-    // (function (i) {
-    //   setTimeout(function () {
     // Notify when exit found
     if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
       exit.solution = exit.path.slice(); //Make copy of the exit path
@@ -201,7 +184,7 @@ function buildMaze() {
     currentCell.checkNeighbour(); //   action when reach dead end
 
     if (currentCell.validNeighbour.length == 0) {
-      moveBack = exit.path[exit.path.length - 1];
+      moveBack = exit.path[exit.path.length - 1]; // move back 1 step because of dead
 
       if (moveBack != undefined) {
         currentCell.positionX > moveBack[0] ? direction = "left" : direction = "right";
@@ -219,29 +202,20 @@ function buildMaze() {
       //   Filter avaiable direction of current cell for exit Path)
       //Pick random an exit from the
       randomPick = Math.floor(Math.random() * currentCell.validNeighbour.length);
-      exit.direction = currentCell.validNeighbour[randomPick]; // when weight direction doesn't include the path
+      exit.direction = currentCell.validNeighbour[randomPick]; // Clear border infront of exit direction
 
-      if (exit.direction == undefined) {
-        exit.direction = currentCell.validNeighbour[0];
-      } else {
-        a = document.getElementById(currentCell.id());
-        a.style["border-".concat(exit.direction)] = "none";
-      } //  Continue to create deadend
+      $(currentCell.id()).style["border-".concat(exit.direction)] = "none"; // Keep track of path taken
 
-
-      exit.path.push([currentCell.positionX, currentCell.positionY]); // solution array
-      // break the wall in front
-
+      exit.path.push([currentCell.positionX, currentCell.positionY]);
       currentCell.move(exit.direction); //Move following direction
+      // keep track of visited cell
 
-      exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited array
-
+      exit.visited.push([currentCell.positionX, currentCell.positionY]);
       a = document.getElementById(currentCell.id());
-      a.classList.add("visited");
-      a.style["border-".concat(exit.directionOpposite())] = "none"; //break the wall behind
-    } //   }, interval * i);
-    // })(i);
+      a.classList.add("visited"); //break the wall behind
 
+      a.style["border-".concat(exit.directionOpposite())] = "none";
+    }
   }
 } // $(`cell_${startPos[0]}_${startPos[1]}`).style.backgroundColor = color.startCell;
 // $(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
@@ -354,6 +328,8 @@ var player = {
     this.icon.classList.add("fas");
     this.icon.classList.add("fa-chess-king");
     this.initiate = true;
+    this.show();
+    this.check;
   },
   positionX: null,
   positionY: null,
@@ -427,56 +403,44 @@ var player = {
     }
   }
 }; //#endregion Object
+// Inititate programe
+
+createTable(width, height);
+buildMaze(); // showSolution();
+//#endregion  End MAZE GENERATOR
+// GUI Funfction
+
+function activatePlayerInput() {
+  playerInput = setInterval(function () {
+    if (rightPressed) {
+      player.move("right");
+    }
+
+    if (leftPressed) {
+      player.move("left");
+    }
+
+    if (upPressed) {
+      player.move("top");
+    }
+
+    if (downPressed) {
+      player.move("bottom");
+    }
+
+    if (player.positionX == endPos[0] && player.positionY == endPos[1]) {
+      clearInterval(playerInput);
+      alert("You Win");
+    }
+  }, refresh);
+}
 
 function play() {
-  $("mazeContainer").innerHTML = "";
   createTable(width, height);
   buildMaze();
   player.start();
-  player.show();
-} //  Creat blank table
-
-
-$("mazeContainer").innerHTML = "";
-createTable(width, height);
-buildMaze();
-showSolution(); //#endregion  End MAZE GENERATOR
+  activatePlayerInput();
+}
 
 player.start();
-player.show();
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-checkscore = setInterval(function () {
-  if (rightPressed) {
-    player.move("right");
-  }
-
-  if (leftPressed) {
-    player.move("left");
-  }
-
-  if (upPressed) {
-    player.move("top");
-  }
-
-  if (downPressed) {
-    player.move("bottom");
-  }
-
-  if (player.positionX == endPos[0] && player.positionY == endPos[1]) {
-    clearInterval(checkscore);
-    alert("You Win");
-  }
-}, 100); //  Shortest path to the destination
-// let xmin = endPos[0] - startPos[0];
-// let ymin = endPos[1] - startPos[1];
-// Vertical distance
-// xmin >= 0 ? (exit.direction = "right") : (exit.direction = "left");
-// exit.availablePath = exit.availablePath.concat(Array(Math.abs(xmin)).fill(exit.direction));
-// // Horizontal distance
-// ymin >= 0 ? (exit.direction = "bottom") : (exit.direction = "top");
-// exit.availablePath = exit.availablePath.concat(Array(Math.abs(ymin)).fill(exit.direction));
-// // Randomize exitpath
-// exit.availablePath = shuffle(exit.availablePath);
-// initiate starting point
-//  check exit.found false then re run the program
+activatePlayerInput();
