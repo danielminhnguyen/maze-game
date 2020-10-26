@@ -3,40 +3,55 @@
 //Build random Maze
 // TODO:
 //
-//#region Maze Generator
 // Variables
-var width = 5; //Canvas width
-
-var height = 5; // Canvas height
-
-var startPos = [1, height];
-var endPos = [width, 1];
-var mazeTable;
 var color = {
   startCell: "green",
   finishCell: "purple",
   mazeBackground: "white",
-  path: "red"
+  path: "red",
+  visualise: "red"
 };
 
 var $ = function $(id) {
   return document.getElementById(id);
 };
 
+var width = 20; // default canvas width
+
+var height = 20; // default canvas height
+
+var startPos;
+var endPos;
+var mazeTable;
 var rightPressed = false;
 var leftPressed = false;
 var upPressed = false;
 var downPressed = false;
-var refresh = 200;
+var refresh = 100;
 var playerInput; // var KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
 // Event listener
 
 document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false); //#region  Functions
+document.addEventListener("keyup", keyUpHandler, false); // Modal box
 
-function keyDownHandler(e) {
-  if ("code" in e) {
-    switch (e.code) {
+var modal = document.getElementById("intro");
+var span = document.getElementsByClassName("close")[0];
+
+span.onclick = function () {
+  modal.style.display = "none";
+}; // When the user clicks anywhere outside of the modal, close it
+
+
+window.onclick = function (event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}; //#region  Functions
+
+
+function keyDownHandler(event) {
+  if ("code" in event) {
+    switch (event.code) {
       case "Unidentified":
         break;
 
@@ -73,22 +88,27 @@ function keyDownHandler(e) {
     }
   }
 
-  if (e.keyCode == 39) {
+  if (event.keyCode == 39) {
     rightPressed = true;
-  } else if (e.keyCode == 37) {
+  } else if (event.keyCode == 37) {
     leftPressed = true;
   }
 
-  if (e.keyCode == 40) {
+  if (event.keyCode == 40) {
     downPressed = true;
-  } else if (e.keyCode == 38) {
+  } else if (event.keyCode == 38) {
     upPressed = true;
+  } // // event.stopImmediatePropagation();
+
+
+  if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
+    event.preventDefault();
   }
 }
 
-function keyUpHandler(e) {
-  if ("code" in e) {
-    switch (e.code) {
+function keyUpHandler(event) {
+  if ("code" in event) {
+    switch (event.code) {
       case "Unidentified":
         break;
 
@@ -125,23 +145,37 @@ function keyUpHandler(e) {
     }
   }
 
-  if (e.keyCode == 39) {
+  if (event.keyCode == 39) {
     rightPressed = false;
-  } else if (e.keyCode == 37) {
+  } else if (event.keyCode == 37) {
     leftPressed = false;
   }
 
-  if (e.keyCode == 40) {
+  if (event.keyCode == 40) {
     downPressed = false;
-  } else if (e.keyCode == 38) {
+  } else if (event.keyCode == 38) {
     upPressed = false;
   }
 }
 
+function timeout(ms) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, ms);
+  });
+}
+
 function createTable(w, h) {
+  resetShowSolution();
   $("mazeContainer").innerHTML = "";
   mazeWidth = w;
   mazeHeight = h;
+  startPos = [1, mazeHeight];
+  endPos = [mazeWidth, 1]; // get drawing size
+  // canvasWidth = document.getElementsByClassName("maze")[0].clientWidth;
+  // canvasHeight = document.getElementsByClassName("maze")[0].clientHeight;
+  // canvasCell = (Math.min(canvasHeight, canvasWidth) - 50) / Math.max(mazeWidth, mazeHeight) - 2;
+
+  canvasCell = 70 / Math.max(mazeWidth, mazeHeight);
   var mazeTable = document.createElement("table");
   var mazeBody = document.createElement("tbody");
 
@@ -151,8 +185,7 @@ function createTable(w, h) {
     for (var row = 1; row <= mazeWidth; row++) {
       var mazeColumn = document.createElement("td");
       mazeColumn.setAttribute("id", "cell_".concat(row, "_").concat(col));
-      mazeColumn.style.width = "".concat(90 / width, "vmin");
-      mazeColumn.style.height = "".concat(90 / height, "vmin");
+      mazeColumn.style.height = mazeColumn.style.width = "".concat(canvasCell, "vmin");
       mazeRow.appendChild(mazeColumn);
     }
 
@@ -166,65 +199,192 @@ function createTable(w, h) {
 }
 
 function buildMaze() {
-  currentCell.positionX = startPos[0];
-  currentCell.positionY = startPos[1];
-  $(currentCell.id()).classList.add("visited");
-  exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited cell
+  return regeneratorRuntime.async(function buildMaze$(_context) {
+    while (1) {
+      switch (_context.prev = _context.next) {
+        case 0:
+          exit.path = exit.solution = [];
+          currentCell.positionX = startPos[0];
+          currentCell.positionY = startPos[1];
+          $(currentCell.id()).classList.add("visited");
+          exit.visited.push([currentCell.positionX, currentCell.positionY]); //visited cell
 
-  for (i = 0; i <= width * height; i++) {
-    // Notify when exit found
-    if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
-      exit.solution = exit.path.slice(); //Make copy of the exit path
+          i = 0;
 
-      exit.found = true;
-      console.log("Exit Found");
-    } //  Check avaiable direction from current cell
+        case 6:
+          if (!(i <= width * height - 2)) {
+            _context.next = 18;
+            break;
+          }
 
+          if (!($("VisualiseMaze").checked == true)) {
+            _context.next = 13;
+            break;
+          }
 
-    currentCell.checkNeighbour(); //   action when reach dead end
+          a = $(currentCell.id());
+          a.classList.add("currentcell");
+          _context.next = 12;
+          return regeneratorRuntime.awrap(this.timeout(10));
 
-    if (currentCell.validNeighbour.length == 0) {
-      moveBack = exit.path[exit.path.length - 1]; // move back 1 step because of dead
+        case 12:
+          a.classList.remove("currentcell");
 
-      if (moveBack != undefined) {
-        currentCell.positionX > moveBack[0] ? direction = "left" : direction = "right";
-        currentCell.positionY > moveBack[0] ? direction = "top" : direction = "bottom";
-        currentCell.positionX = moveBack[0];
-        currentCell.positionY = moveBack[1]; // exit.fullPath.push(direction);
+        case 13:
+          //  Check avaiable direction from current cell
+          currentCell.checkNeighbour(); //   action when reach dead end
 
-        currentCell.checkNeighbour();
-        exit.path.pop();
-        i--;
-      } else {
-        console.log("exit path is empty");
+          if (currentCell.validNeighbour.length == 0) {
+            moveBack = exit.path[exit.path.length - 1]; // move back 1 step because of dead
+
+            if (moveBack != undefined) {
+              currentCell.positionX > moveBack[0] ? direction = "left" : direction = "right";
+              currentCell.positionY > moveBack[0] ? direction = "top" : direction = "bottom";
+              currentCell.positionX = moveBack[0];
+              currentCell.positionY = moveBack[1]; // exit.fullPath.push(direction);
+
+              currentCell.checkNeighbour();
+              exit.path.pop();
+              i--;
+            } else {
+              console.log("exit path is empty");
+            }
+          } else {
+            //   Filter avaiable direction of current cell for exit Path)
+            //Pick random an exit from the
+            randomPick = Math.floor(Math.random() * currentCell.validNeighbour.length);
+            exit.direction = currentCell.validNeighbour[randomPick]; // Clear border infront of exit direction
+
+            $(currentCell.id()).style["border-".concat(exit.direction)] = "none"; // Keep track of path taken
+
+            exit.path.push([currentCell.positionX, currentCell.positionY]);
+            currentCell.move(exit.direction); //Move following direction
+            // keep track of visited cell
+
+            exit.visited.push([currentCell.positionX, currentCell.positionY]);
+
+            if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
+              exit.solution = exit.path.slice(); //Make copy of the exit path
+
+              exit.found = true;
+              console.log("Exit Found");
+            }
+
+            a = document.getElementById(currentCell.id());
+            a.classList.add("visited"); //break the wall behind
+
+            a.style["border-".concat(exit.directionOpposite())] = "none";
+          }
+
+        case 15:
+          i++;
+          _context.next = 6;
+          break;
+
+        case 18:
+        case "end":
+          return _context.stop();
       }
-    } else {
-      //   Filter avaiable direction of current cell for exit Path)
-      //Pick random an exit from the
-      randomPick = Math.floor(Math.random() * currentCell.validNeighbour.length);
-      exit.direction = currentCell.validNeighbour[randomPick]; // Clear border infront of exit direction
-
-      $(currentCell.id()).style["border-".concat(exit.direction)] = "none"; // Keep track of path taken
-
-      exit.path.push([currentCell.positionX, currentCell.positionY]);
-      currentCell.move(exit.direction); //Move following direction
-      // keep track of visited cell
-
-      exit.visited.push([currentCell.positionX, currentCell.positionY]);
-      a = document.getElementById(currentCell.id());
-      a.classList.add("visited"); //break the wall behind
-
-      a.style["border-".concat(exit.directionOpposite())] = "none";
     }
-  }
+  }, null, this);
 } // $(`cell_${startPos[0]}_${startPos[1]}`).style.backgroundColor = color.startCell;
 // $(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
 
 
 function showSolution() {
-  exit.solution.forEach(function (a) {
-    $("cell_".concat(a[0], "_").concat(a[1])).style.backgroundColor = color.path;
-  });
+  switch ($("solution").innerHTML) {
+    case "Show Solution":
+      exit.solution.forEach(function (a) {
+        console.log("cell_".concat(a[0], "_").concat(a[1]));
+        $("cell_".concat(a[0], "_").concat(a[1])).classList.add("solution");
+      });
+      $("solution").innerHTML = "Hide Solution";
+      break;
+
+    case "Hide Solution":
+      exit.solution.forEach(function (a) {
+        $("cell_".concat(a[0], "_").concat(a[1])).classList.remove("solution");
+      });
+      $("solution").innerHTML = "Show Solution";
+      break;
+
+    default:
+      break;
+  }
+}
+
+function resetShowSolution() {
+  $("solution").innerHTML = "Show Solution";
+  $("solution").disabled = true;
+} // GUI Funfction
+
+
+function activatePlayerInput() {
+  playerInput = setInterval(function () {
+    if (rightPressed) {
+      player.move("right");
+    }
+
+    if (leftPressed) {
+      player.move("left");
+    }
+
+    if (upPressed) {
+      player.move("top");
+    }
+
+    if (downPressed) {
+      player.move("bottom");
+    }
+
+    if (player.positionX == endPos[0] && player.positionY == endPos[1]) {
+      clearInterval(playerInput);
+      alert("You Win");
+    }
+  }, refresh);
+  $("solution").disabled = false;
+}
+
+function reset() {
+  getmode();
+  createTable(width, height);
+}
+
+function getmode() {
+  var mode = $("mode");
+
+  switch (mode.value) {
+    case "easy":
+      width = 10;
+      height = 10;
+      break;
+
+    case "medium":
+      width = 20;
+      height = 20;
+      break;
+
+    case "hard":
+      width = 30;
+      height = 30;
+      break;
+
+    case "insane":
+      width = 50;
+      height = 50;
+      break;
+
+    default:
+      break;
+  }
+}
+
+function remaze() {
+  getmode();
+  createTable(width, height);
+  buildMaze();
+  player.start();
+  activatePlayerInput();
 } //#endregion End Function
 //#region  Objects
 
@@ -344,7 +504,6 @@ var player = {
     for (var _i = 0; _i <= 3; _i++) {
       if (a.style["border-".concat(this.availableMove[_i])] == "none") {
         this.validMove.push(this.availableMove[_i]);
-        console.log(this.availableMove[_i]);
       }
     }
   },
@@ -407,40 +566,6 @@ var player = {
 
 createTable(width, height);
 buildMaze(); // showSolution();
-//#endregion  End MAZE GENERATOR
-// GUI Funfction
-
-function activatePlayerInput() {
-  playerInput = setInterval(function () {
-    if (rightPressed) {
-      player.move("right");
-    }
-
-    if (leftPressed) {
-      player.move("left");
-    }
-
-    if (upPressed) {
-      player.move("top");
-    }
-
-    if (downPressed) {
-      player.move("bottom");
-    }
-
-    if (player.positionX == endPos[0] && player.positionY == endPos[1]) {
-      clearInterval(playerInput);
-      alert("You Win");
-    }
-  }, refresh);
-}
-
-function play() {
-  createTable(width, height);
-  buildMaze();
-  player.start();
-  activatePlayerInput();
-}
 
 player.start();
 activatePlayerInput();

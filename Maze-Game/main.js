@@ -2,27 +2,27 @@
 // TODO:
 //
 
-//#region Maze Generator
 // Variables
-let width = 5; //Canvas width
-let height = 5; // Canvas height
-let startPos = [1, height];
-let endPos = [width, 1];
-let mazeTable;
 const color = {
   startCell: "green",
   finishCell: "purple",
   mazeBackground: "white",
   path: "red",
+  visualise: "red",
 };
 var $ = function (id) {
   return document.getElementById(id);
 };
+let width = 20; // default canvas width
+let height = 20; // default canvas height
+let startPos;
+let endPos;
+let mazeTable;
 let rightPressed = false;
 let leftPressed = false;
 let upPressed = false;
 let downPressed = false;
-let refresh = 200;
+let refresh = 100;
 let playerInput;
 // var KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
 
@@ -30,10 +30,23 @@ let playerInput;
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 
+// Modal box
+var modal = document.getElementById("intro");
+var span = document.getElementsByClassName("close")[0];
+span.onclick = function () {
+  modal.style.display = "none";
+};
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function (event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
 //#region  Functions
-function keyDownHandler(e) {
-  if ("code" in e) {
-    switch (e.code) {
+function keyDownHandler(event) {
+  if ("code" in event) {
+    switch (event.code) {
       case "Unidentified":
         break;
       case "ArrowRight":
@@ -61,21 +74,26 @@ function keyDownHandler(e) {
     }
   }
 
-  if (e.keyCode == 39) {
+  if (event.keyCode == 39) {
     rightPressed = true;
-  } else if (e.keyCode == 37) {
+  } else if (event.keyCode == 37) {
     leftPressed = true;
   }
-  if (e.keyCode == 40) {
+  if (event.keyCode == 40) {
     downPressed = true;
-  } else if (e.keyCode == 38) {
+  } else if (event.keyCode == 38) {
     upPressed = true;
+  }
+  // // event.stopImmediatePropagation();
+
+  if ([32, 37, 38, 39, 40].indexOf(event.keyCode) > -1) {
+    event.preventDefault();
   }
 }
 
-function keyUpHandler(e) {
-  if ("code" in e) {
-    switch (e.code) {
+function keyUpHandler(event) {
+  if ("code" in event) {
+    switch (event.code) {
       case "Unidentified":
         break;
       case "ArrowRight":
@@ -103,31 +121,44 @@ function keyUpHandler(e) {
     }
   }
 
-  if (e.keyCode == 39) {
+  if (event.keyCode == 39) {
     rightPressed = false;
-  } else if (e.keyCode == 37) {
+  } else if (event.keyCode == 37) {
     leftPressed = false;
   }
-  if (e.keyCode == 40) {
+  if (event.keyCode == 40) {
     downPressed = false;
-  } else if (e.keyCode == 38) {
+  } else if (event.keyCode == 38) {
     upPressed = false;
   }
 }
 
+function timeout(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function createTable(w, h) {
+  resetShowSolution();
   $("mazeContainer").innerHTML = "";
   mazeWidth = w;
   mazeHeight = h;
+  startPos = [1, mazeHeight];
+  endPos = [mazeWidth, 1];
+  // get drawing size
+  // canvasWidth = document.getElementsByClassName("maze")[0].clientWidth;
+  // canvasHeight = document.getElementsByClassName("maze")[0].clientHeight;
+  // canvasCell = (Math.min(canvasHeight, canvasWidth) - 50) / Math.max(mazeWidth, mazeHeight) - 2;
+  canvasCell = 70 / Math.max(mazeWidth, mazeHeight);
+
   let mazeTable = document.createElement("table");
   let mazeBody = document.createElement("tbody");
+
   for (let col = 1; col <= mazeHeight; col++) {
     var mazeRow = document.createElement("tr");
     for (let row = 1; row <= mazeWidth; row++) {
       var mazeColumn = document.createElement("td");
       mazeColumn.setAttribute("id", `cell_${row}_${col}`);
-      mazeColumn.style.width = `${90 / width}vmin`;
-      mazeColumn.style.height = `${90 / height}vmin`;
+      mazeColumn.style.height = mazeColumn.style.width = `${canvasCell}vmin`;
       mazeRow.appendChild(mazeColumn);
     }
     mazeBody.appendChild(mazeRow);
@@ -138,7 +169,8 @@ function createTable(w, h) {
   $(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
 }
 
-function buildMaze() {
+async function buildMaze() {
+  exit.path = exit.solution = [];
   currentCell.positionX = startPos[0];
   currentCell.positionY = startPos[1];
 
@@ -146,13 +178,15 @@ function buildMaze() {
   exit.visited.push([currentCell.positionX, currentCell.positionY]);
   //visited cell
 
-  for (i = 0; i <= width * height; i++) {
+  for (i = 0; i <= width * height - 2; i++) {
     // Notify when exit found
-    if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
-      exit.solution = exit.path.slice(); //Make copy of the exit path
-      exit.found = true;
-      console.log("Exit Found");
+    if ($("VisualiseMaze").checked == true) {
+      a = $(currentCell.id());
+      a.classList.add("currentcell");
+      await this.timeout(10);
+      a.classList.remove("currentcell");
     }
+
     //  Check avaiable direction from current cell
     currentCell.checkNeighbour();
     //   action when reach dead end
@@ -189,6 +223,12 @@ function buildMaze() {
       // keep track of visited cell
       exit.visited.push([currentCell.positionX, currentCell.positionY]);
 
+      if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
+        exit.solution = exit.path.slice(); //Make copy of the exit path
+        exit.found = true;
+        console.log("Exit Found");
+      }
+
       a = document.getElementById(currentCell.id());
       a.classList.add("visited");
       //break the wall behind
@@ -200,10 +240,89 @@ function buildMaze() {
 // $(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
 
 function showSolution() {
-  exit.solution.forEach((a) => {
-    $(`cell_${a[0]}_${a[1]}`).style.backgroundColor = color.path;
-  });
+  switch ($("solution").innerHTML) {
+    case "Show Solution":
+      exit.solution.forEach((a) => {
+        console.log(`cell_${a[0]}_${a[1]}`);
+        $(`cell_${a[0]}_${a[1]}`).classList.add("solution");
+      });
+      $("solution").innerHTML = "Hide Solution";
+      break;
+    case "Hide Solution":
+      exit.solution.forEach((a) => {
+        $(`cell_${a[0]}_${a[1]}`).classList.remove("solution");
+      });
+      $("solution").innerHTML = "Show Solution";
+      break;
+    default:
+      break;
+  }
 }
+
+function resetShowSolution() {
+  $("solution").innerHTML = "Show Solution";
+  $("solution").disabled = true;
+}
+// GUI Funfction
+function activatePlayerInput() {
+  playerInput = setInterval(() => {
+    if (rightPressed) {
+      player.move("right");
+    }
+    if (leftPressed) {
+      player.move("left");
+    }
+    if (upPressed) {
+      player.move("top");
+    }
+    if (downPressed) {
+      player.move("bottom");
+    }
+    if (player.positionX == endPos[0] && player.positionY == endPos[1]) {
+      clearInterval(playerInput);
+      alert("You Win");
+    }
+  }, refresh);
+  $("solution").disabled = false;
+}
+
+function reset() {
+  getmode();
+  createTable(width, height);
+}
+
+function getmode() {
+  let mode = $("mode");
+  switch (mode.value) {
+    case "easy":
+      width = 10;
+      height = 10;
+      break;
+    case "medium":
+      width = 20;
+      height = 20;
+      break;
+    case "hard":
+      width = 30;
+      height = 30;
+      break;
+    case "insane":
+      width = 50;
+      height = 50;
+      break;
+    default:
+      break;
+  }
+}
+
+function remaze() {
+  getmode();
+  createTable(width, height);
+  buildMaze();
+  player.start();
+  activatePlayerInput();
+}
+
 //#endregion End Function
 
 //#region  Objects
@@ -311,7 +430,6 @@ let player = {
     for (let i = 0; i <= 3; i++) {
       if (a.style[`border-${this.availableMove[i]}`] == "none") {
         this.validMove.push(this.availableMove[i]);
-        console.log(this.availableMove[i]);
       }
     }
   },
@@ -367,39 +485,10 @@ let player = {
 //#endregion Object
 
 // Inititate programe
+
 createTable(width, height);
 buildMaze();
 // showSolution();
-
-//#endregion  End MAZE GENERATOR
-
-// GUI Funfction
-function activatePlayerInput() {
-  playerInput = setInterval(() => {
-    if (rightPressed) {
-      player.move("right");
-    }
-    if (leftPressed) {
-      player.move("left");
-    }
-    if (upPressed) {
-      player.move("top");
-    }
-    if (downPressed) {
-      player.move("bottom");
-    }
-    if (player.positionX == endPos[0] && player.positionY == endPos[1]) {
-      clearInterval(playerInput);
-      alert("You Win");
-    }
-  }, refresh);
-}
-function play() {
-  createTable(width, height);
-  buildMaze();
-  player.start();
-  activatePlayerInput();
-}
 
 player.start();
 activatePlayerInput();

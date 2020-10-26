@@ -4,22 +4,89 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://kit.fontawesome.com/7f6299d5ea.js" crossorigin="anonymous"></script>
-
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Raleway" />
     <title>Maze Runner</title>
     <link rel="stylesheet" href=".\dist\main.css" />
   </head>
-  <body>
-    <div class="control">
-      <select name="" id="mode">
-        <option value="Easy"></option>
-        <option value="Medium"></option>
-        <option value="Hard"></option>
-        <option value="Insane"></option>
-      </select>
-      <button class="button1" onclick="play()">Play</button>
+  <body class="layout">
+    <div class="modal" id="intro">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Welcome to Maze Generator Algorithm</h2>
+        <p>Try to use <strong>Visualise</strong> and press <strong>Re-Maze</strong> to see the algorithm in action.</p>
+        <p>I think visualising is the best way to see understand how an algorithm works
+        I will try to add more algorithm and put path finding algorithm in the future</p>
+          <p>We use randomized depth-first algorithm:</p>
+        <ol>
+          <li>Given a current cell as a parameter</li>
+          <li>Mark the current cell as visited</li>
+          <li>While the current cell has any unvisited neighbour cells</li>
+          <ol>
+            <li>Choose randomly one of the unvisited neighbours</li>
+            <li>Remove the wall between the current cell and the chosen cell</li>
+            <li>Invoke the routine recursively for a chosen cell</li>
+            <li>Keep track of the path taken</li>
+          </ol>
+          <li>Reach a dead-end with no available unvisited neighbour</li>
+          <ol>
+            <li>Take step back until found cell with valid neighbour</li>
+          </ol>
+          <li>Continue until all the cell has been visited</li>
+        </ul>
+      </div>
     </div>
-    <br />
-    <div id="mazeContainer"></div>
+    
+    <div class="layout__header header">
+      <svg
+        width="106.36"
+        height="28.4"
+        viewBox="0 0 106.36 28.4"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g
+          id="svgGroup"
+          stroke-linecap="round"
+          fill-rule="evenodd"
+          font-size="9pt"
+          stroke="#000"
+          stroke-width="0.25mm"
+          fill="#000"
+          style="stroke: white; stroke-width: 0.25mm; fill: white"
+        >
+          <path
+            d="M 27.96 28.4 L 25.16 28.4 L 25.16 5.28 L 14.88 23.24 L 13.12 23.24 L 2.8 5.28 L 2.8 28.4 L 0 28.4 L 0 0 L 2.88 0 L 13.96 19.44 L 25.12 0 L 27.96 0 L 27.96 28.4 Z M 90.08 25.92 L 106.36 25.92 L 106.36 28.4 L 87.28 28.4 L 87.28 0 L 106 0 L 106 2.48 L 90.08 2.48 L 90.08 12.72 L 103.96 12.72 L 103.96 15.08 L 90.08 15.08 L 90.08 25.92 Z M 59.8 28.4 L 59.8 26.2 L 79.12 2.48 L 60.12 2.48 L 60.12 0 L 82.36 0 L 82.36 2.2 L 63.28 25.92 L 82.32 25.92 L 82.32 28.4 L 59.8 28.4 Z M 32 28.4 L 43.88 0 L 46.24 0 L 58.04 28.4 L 55.08 28.4 L 51.4 19.52 L 38.64 19.52 L 35 28.4 L 32 28.4 Z M 39.24 17.32 L 50.76 17.32 L 45.04 3.28 L 39.24 17.32 Z"
+            vector-effect="non-scaling-stroke"
+          />
+        </g>
+      </svg>
+      <div><h5>Maze Generator</h5></div>
+      <div><h5>Path Finding</h5></div>
+    </div>
+    <div class="layout__info info">
+      <p>View project source at</p>
+      <a href="https://github.com/danielminhnguyen/danielminhnguyen.github.io/tree/master/Maze-Game" >github</a>
+    </div>
+
+    <div id="control" class="layout__control control">
+      <h5>Maze Generator</h5>
+      <select name="" id="mode">
+        <option value="easy">Easy</option>
+        <option selected="selected" value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="insane">Insane</option>
+      </select>
+
+      <button class="button1" onclick="reset()">Reset</button>
+      <button class="button1" onclick="remaze()">Re-Maze</button>
+      <button id="solution" class="button1" onclick="showSolution()">Show Solution</button>
+      <div class="checkbox">
+        <label> Visualise</label>
+        <input type="checkbox" name="" id="VisualiseMaze" />
+      </div>
+    </div>
+
+    <div id="mazeContainer" class="layout_maze maze">
+    </div>
 
     <script src="main.js"></script>
   </body>
