@@ -28,7 +28,8 @@ var leftPressed = false;
 var upPressed = false;
 var downPressed = false;
 var refresh = 100;
-var playerInput; // var KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
+var playerInput;
+var speed; // var KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
 // Event listener
 
 document.addEventListener("keydown", keyDownHandler, false);
@@ -45,6 +46,22 @@ span.onclick = function () {
 window.onclick = function (event) {
   if (event.target == modal) {
     modal.style.display = "none";
+  }
+}; // visualise on click
+
+
+$("VisualiseMaze").onclick = function () {
+  switch ($("VisualiseMaze").checked) {
+    case true:
+      $("speed").style.display = "block";
+      break;
+
+    case false:
+      $("speed").style.display = "none";
+      break;
+
+    default:
+      break;
   }
 }; //#region  Functions
 
@@ -203,6 +220,7 @@ function buildMaze() {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
+          speed = 1000 / $("speed").value;
           exit.path = exit.solution = [];
           currentCell.positionX = startPos[0];
           currentCell.positionY = startPos[1];
@@ -211,26 +229,26 @@ function buildMaze() {
 
           i = 0;
 
-        case 6:
+        case 7:
           if (!(i <= width * height - 2)) {
-            _context.next = 18;
+            _context.next = 19;
             break;
           }
 
           if (!($("VisualiseMaze").checked == true)) {
-            _context.next = 13;
+            _context.next = 14;
             break;
           }
 
           a = $(currentCell.id());
           a.classList.add("currentcell");
-          _context.next = 12;
-          return regeneratorRuntime.awrap(this.timeout(10));
-
-        case 12:
-          a.classList.remove("currentcell");
+          _context.next = 13;
+          return regeneratorRuntime.awrap(this.timeout(1000 / $("speed").value));
 
         case 13:
+          a.classList.remove("currentcell");
+
+        case 14:
           //  Check avaiable direction from current cell
           currentCell.checkNeighbour(); //   action when reach dead end
 
@@ -276,12 +294,12 @@ function buildMaze() {
             a.style["border-".concat(exit.directionOpposite())] = "none";
           }
 
-        case 15:
+        case 16:
           i++;
-          _context.next = 6;
+          _context.next = 7;
           break;
 
-        case 18:
+        case 19:
         case "end":
           return _context.stop();
       }

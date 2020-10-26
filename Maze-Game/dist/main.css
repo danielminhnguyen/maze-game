@@ -42,6 +42,10 @@
   font-size: 1px;
 }
 
+.speed {
+  display: none;
+}
+
 .solution {
   background-color: red !important;
 }
@@ -128,8 +132,31 @@ body {
 }
 
 .maze {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  min-height: 50vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.maze {
   position: relative;
-  margin: 1rem 0 0 1rem;
+  padding: 1rem;
 }
 .maze table {
   margin: auto;
@@ -168,7 +195,11 @@ body {
   justify-content: center;
   align-items: center;
 }
+.control h5 {
+  font-weight: bold;
+}
 .control * {
+  font-size: 0.8rem;
   margin: 1vw auto;
   height: 3vw;
   width: 15vw;
@@ -181,7 +212,7 @@ body {
   flex-direction: row;
 }
 .control .checkbox label {
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 .control .button1 {
   height: 3vw;

@@ -24,6 +24,7 @@ let upPressed = false;
 let downPressed = false;
 let refresh = 100;
 let playerInput;
+let speed;
 // var KeyboardHelper = { left: 37, up: 38, right: 39, down: 40 };
 
 // Event listener
@@ -40,6 +41,20 @@ span.onclick = function () {
 window.onclick = function (event) {
   if (event.target == modal) {
     modal.style.display = "none";
+  }
+};
+
+// visualise on click
+$("VisualiseMaze").onclick = function () {
+  switch ($("VisualiseMaze").checked) {
+    case true:
+      $("speed").style.display = "block";
+      break;
+    case false:
+      $("speed").style.display = "none";
+      break;
+    default:
+      break;
   }
 };
 
@@ -170,6 +185,7 @@ function createTable(w, h) {
 }
 
 async function buildMaze() {
+  speed = 1000 / $("speed").value;
   exit.path = exit.solution = [];
   currentCell.positionX = startPos[0];
   currentCell.positionY = startPos[1];
@@ -183,7 +199,7 @@ async function buildMaze() {
     if ($("VisualiseMaze").checked == true) {
       a = $(currentCell.id());
       a.classList.add("currentcell");
-      await this.timeout(10);
+      await this.timeout(1000 / $("speed").value);
       a.classList.remove("currentcell");
     }
 

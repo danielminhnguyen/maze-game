@@ -61,6 +61,9 @@ $maze-solution: red;
   font-size: 1px;
 }
 
+.speed {
+  display: none;
+}
 .solution {
   background-color: $maze-solution !important;
 }
@@ -137,9 +140,32 @@ body {
 }
 
 .maze {
-  position: relative;
-  margin: 1rem 0 0 1rem;
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  min-height: 50vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
 
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.maze {
+  position: relative;
+  padding: 1rem;
   table {
     margin: auto;
     position: relative;
@@ -177,7 +203,11 @@ body {
   background-color: $top-color;
   justify-content: center;
   align-items: center;
+  h5 {
+    font-weight: bold;
+  }
   * {
+    font-size: 0.8rem;
     margin: 1vw auto;
     height: 3vw;
     width: 15vw;
@@ -191,7 +221,7 @@ body {
     display: flex;
     flex-direction: row;
     label {
-      font-size: 1.5rem;
+      font-size: 1rem;
     }
   }
   .button1 {
