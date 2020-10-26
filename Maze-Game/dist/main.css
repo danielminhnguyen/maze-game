@@ -104,6 +104,10 @@
   cursor: pointer;
 }
 
+.speed {
+  display: none;
+}
+
 body {
   margin: 0;
   padding: 0;
