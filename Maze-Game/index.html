@@ -14,6 +14,7 @@
         <span class="close">&times;</span>
         <h2>Welcome to Maze Generator Algorithm</h2>
         <p>Try to use <strong>Visualise</strong> and press <strong>Re-Maze</strong> to see the algorithm in action. Use slider to adjust the speed</p>
+        <p>Use <strong>Edit Mode</strong> to move entrance and exit around</p>
         <p>Use Keyboard to move character around to the <strong>Exit</strong></p>
         <p>I think visualising is the best way to see and understand how an algorithm works</p>
           <p>We use randomized depth-first algorithm:</p>
@@ -76,15 +77,15 @@
         <option value="insane">Insane</option>
       </select>
 
-      <!-- <button class="button1" onclick="reset()">Reset</button> -->
-      <button class="button1" onclick="remaze()">Re-Maze</button>
+      <button class="button1" onclick="reset()">Edit Mode</button>
+      <button class="button1" onclick="remaze()">Build Maze</button>
       <button id="solution" class="button1" onclick="showSolution()">Show Solution</button>
       <div class="checkbox">
         <label> Visualise</label>
         <input type="checkbox" name="" id="VisualiseMaze" />
 
       </div>
-      <input id="speed" type="range" min=2 max=50 value=5>
+      <input id="speed" type="range" min=2 max=100 value=5>
     </div>
 
     <div id="mazeContainer" class="layout_maze maze">

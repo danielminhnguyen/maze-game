@@ -13,11 +13,11 @@ const color = {
 var $ = function (id) {
   return document.getElementById(id);
 };
-let width = 20; // default canvas width
-let height = 20; // default canvas height
-let startPos;
-let endPos;
-let mazeTable;
+// let width; // default canvas width
+// let height; // default canvas height
+// let startPos;
+// let endPos;
+// let mazeTable;
 let rightPressed = false;
 let leftPressed = false;
 let upPressed = false;
@@ -30,6 +30,9 @@ let speed;
 // Event listener
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
+
+// Drag Start and Exit location
+function startDrag() {}
 
 // Modal box
 var modal = document.getElementById("intro");
@@ -148,53 +151,159 @@ function keyUpHandler(event) {
   }
 }
 
+let entrance;
+let dragItem;
+
+function id2coordinate(id) {
+  let s = id.slice(id.indexOf("_") + 1, id.length);
+  let x = s.slice(0, s.indexOf("_"));
+  let y = s.slice(s.indexOf("_") + 1, s.length);
+  return [x, y];
+}
+
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function createTable(w, h) {
-  resetShowSolution();
-  $("mazeContainer").innerHTML = "";
-  mazeWidth = w;
-  mazeHeight = h;
-  startPos = [1, mazeHeight];
-  endPos = [mazeWidth, 1];
-  // get drawing size
-  // canvasWidth = document.getElementsByClassName("maze")[0].clientWidth;
-  // canvasHeight = document.getElementsByClassName("maze")[0].clientHeight;
-  // canvasCell = (Math.min(canvasHeight, canvasWidth) - 50) / Math.max(mazeWidth, mazeHeight) - 2;
-  canvasCell = 70 / Math.max(mazeWidth, mazeHeight);
-
-  let mazeTable = document.createElement("table");
-  let mazeBody = document.createElement("tbody");
-
-  for (let col = 1; col <= mazeHeight; col++) {
-    var mazeRow = document.createElement("tr");
-    for (let row = 1; row <= mazeWidth; row++) {
-      var mazeColumn = document.createElement("td");
-      mazeColumn.setAttribute("id", `cell_${row}_${col}`);
-      mazeColumn.style.height = mazeColumn.style.width = `${canvasCell}vmin`;
-      mazeRow.appendChild(mazeColumn);
-    }
-    mazeBody.appendChild(mazeRow);
-  }
-  mazeTable.appendChild(mazeBody);
-  $("mazeContainer").appendChild(mazeTable);
-  $(`cell_${startPos[0]}_${startPos[1]}`).style.backgroundColor = color.startCell;
-  $(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
+function dragStart(ev) {
+  console.log("start");
+  this.style.backgroundColor = "green";
+  requestAnimationFrame(() => (this.style.backgroundColor = "transparent"), 0);
+  dragItem = ev.target;
+  ev.dataTransfer.setData("text", ev.target.id);
 }
+
+function dragEnd() {
+  console.log("end");
+  // this.style.backgroundColor = "red";
+}
+
+function dragOver(ev) {
+  console.log("dragover");
+  ev.preventDefault();
+}
+
+function dragEnter() {
+  // this.style.backgroundColor = "gray";
+}
+
+function dragLeave() {
+  // this.style.backgroundColor = "none";
+}
+
+function dragDrop(ev) {
+  ev.preventDefault();
+  let id = ev.target.id;
+  if (ev.target.classList.contains("dropzone")) {
+    if (dragItem.classList.contains("entrance")) {
+      mazeTable.startPos = id2coordinate(ev.target.id);
+    }
+    if (dragItem.classList.contains("exitGate")) {
+      mazeTable.endPos = id2coordinate(ev.target.id);
+    }
+    dragItem.parentNode.classList.add("dropzone");
+    dragItem.parentNode.removeChild(dragItem);
+    ev.target.appendChild(dragItem);
+    ev.target.classList.add("dropzone");
+  }
+}
+
+mazeTable = {
+  width: null,
+  height: null,
+  startPos: null,
+  endPos: null,
+  initiate: function () {
+    let mode = $("mode");
+    switch (mode.value) {
+      case "easy":
+        this.width = 10;
+        this.height = 10;
+        break;
+      case "medium":
+        this.width = 20;
+        this.height = 20;
+        break;
+      case "hard":
+        this.width = 30;
+        this.height = 30;
+        break;
+      case "insane":
+        this.width = 50;
+        this.height = 50;
+        break;
+      default:
+        break;
+    }
+    debugger;
+    if (this.startPos == null || this.startPos[1] > this.height || this.startPos[0] > this.width) {
+      this.startPos = [1, this.height];
+    }
+    if (this.endPos == null || this.endPos[1] > this.height || this.endPos[0] > this.width) {
+      this.endPos = [this.width, 1];
+    }
+  },
+  build: function () {
+    $("solution").innerHTML = "Show Solution";
+    $("solution").disabled = true;
+
+    $("mazeContainer").innerHTML = "";
+
+    // Calculate table cell size
+    canvasCell = 70 / Math.max(this.width, this.height);
+
+    let mazeTable = document.createElement("table");
+    let mazeBody = document.createElement("tbody");
+
+    for (let col = 1; col <= this.height; col++) {
+      var mazeRow = document.createElement("tr");
+      for (let row = 1; row <= this.width; row++) {
+        var mazeColumn = document.createElement("td");
+        mazeColumn.setAttribute("id", `cell_${row}_${col}`);
+        mazeColumn.style.height = mazeColumn.style.width = `${canvasCell}vmin`;
+        mazeColumn.classList.add("dropzone");
+        mazeColumn.addEventListener("dragover", dragOver);
+        // mazeColumn.addEventListener("dragenter", dragEnter);
+        // mazeColumn.addEventListener("dragleave", dragLeave);
+        mazeColumn.addEventListener("drop", dragDrop);
+
+        mazeRow.appendChild(mazeColumn);
+      }
+      mazeBody.appendChild(mazeRow);
+    }
+    mazeTable.appendChild(mazeBody);
+    $("mazeContainer").appendChild(mazeTable);
+
+    entrance = document.createElement("div");
+    entrance.classList.add("entrance");
+    entrance.setAttribute("draggable", true);
+    entrance.addEventListener("dragstart", dragStart);
+    entrance.addEventListener("dragend", dragEnd);
+
+    $(`cell_${this.startPos[0]}_${this.startPos[1]}`).appendChild(entrance);
+    $(`cell_${this.startPos[0]}_${this.startPos[1]}`).classList.remove("dropzone");
+    exitGate = document.createElement("div");
+    exitGate.classList.add("exitGate");
+    exitGate.setAttribute("draggable", true);
+    exitGate.addEventListener("dragstart", dragStart);
+    exitGate.addEventListener("dragend", dragEnd);
+
+    $(`cell_${this.endPos[0]}_${this.endPos[1]}`).appendChild(exitGate);
+    $(`cell_${this.endPos[0]}_${this.endPos[1]}`).classList.remove("dropzone");
+  },
+};
 
 async function buildMaze() {
   speed = 1000 / $("speed").value;
   exit.path = exit.solution = [];
-  currentCell.positionX = startPos[0];
-  currentCell.positionY = startPos[1];
+  currentCell.positionX = mazeTable.startPos[0];
+  currentCell.positionY = mazeTable.startPos[1];
 
   $(currentCell.id()).classList.add("visited");
   exit.visited.push([currentCell.positionX, currentCell.positionY]);
   //visited cell
 
-  for (i = 0; i <= width * height - 2; i++) {
+  for (i = 0; i <= mazeTable.width * mazeTable.height - 2; i++) {
     // Notify when exit found
     if ($("VisualiseMaze").checked == true) {
       a = $(currentCell.id());
@@ -202,7 +311,6 @@ async function buildMaze() {
       await this.timeout(1000 / $("speed").value);
       a.classList.remove("currentcell");
     }
-
     //  Check avaiable direction from current cell
     currentCell.checkNeighbour();
     //   action when reach dead end
@@ -239,7 +347,10 @@ async function buildMaze() {
       // keep track of visited cell
       exit.visited.push([currentCell.positionX, currentCell.positionY]);
 
-      if (currentCell.positionX == endPos[0] && currentCell.positionY == endPos[1]) {
+      if (
+        currentCell.positionX == mazeTable.endPos[0] &&
+        currentCell.positionY == mazeTable.endPos[1]
+      ) {
         exit.solution = exit.path.slice(); //Make copy of the exit path
         exit.found = true;
         console.log("Exit Found");
@@ -251,6 +362,8 @@ async function buildMaze() {
       a.style[`border-${exit.directionOpposite()}`] = "none";
     }
   }
+  document.querySelector(".entrance").setAttribute("draggable", false);
+  document.querySelector(".exitGate").setAttribute("draggable", false);
 }
 // $(`cell_${startPos[0]}_${startPos[1]}`).style.backgroundColor = color.startCell;
 // $(`cell_${endPos[0]}_${endPos[1]}`).style.backgroundColor = color.finishCell;
@@ -275,10 +388,6 @@ function showSolution() {
   }
 }
 
-function resetShowSolution() {
-  $("solution").innerHTML = "Show Solution";
-  $("solution").disabled = true;
-}
 // GUI Funfction
 function activatePlayerInput() {
   playerInput = setInterval(() => {
@@ -294,7 +403,7 @@ function activatePlayerInput() {
     if (downPressed) {
       player.move("bottom");
     }
-    if (player.positionX == endPos[0] && player.positionY == endPos[1]) {
+    if (player.positionX == mazeTable.endPos[0] && player.positionY == mazeTable.endPos[1]) {
       clearInterval(playerInput);
       alert("You Win");
     }
@@ -303,37 +412,15 @@ function activatePlayerInput() {
 }
 
 function reset() {
-  getmode();
-  createTable(width, height);
-}
-
-function getmode() {
-  let mode = $("mode");
-  switch (mode.value) {
-    case "easy":
-      width = 10;
-      height = 10;
-      break;
-    case "medium":
-      width = 20;
-      height = 20;
-      break;
-    case "hard":
-      width = 30;
-      height = 30;
-      break;
-    case "insane":
-      width = 50;
-      height = 50;
-      break;
-    default:
-      break;
-  }
+  mazeTable.initiate();
+  mazeTable.build();
+  // getmode();
+  // createTable(width, height);
 }
 
 function remaze() {
-  getmode();
-  createTable(width, height);
+  mazeTable.initiate();
+  mazeTable.build();
   buildMaze();
   player.start();
   activatePlayerInput();
@@ -424,8 +511,8 @@ let currentCell = {
 
 let player = {
   start: function () {
-    this.positionX = startPos[0];
-    this.positionY = startPos[1];
+    this.positionX = mazeTable.startPos[0];
+    this.positionY = mazeTable.startPos[1];
     this.icon = document.createElement("i");
     this.icon.classList.add("fas");
     this.icon.classList.add("fa-chess-king");
@@ -502,7 +589,9 @@ let player = {
 
 // Inititate programe
 
-createTable(width, height);
+// createTable(width, height);
+mazeTable.initiate();
+mazeTable.build();
 buildMaze();
 // showSolution();
 
