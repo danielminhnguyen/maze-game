@@ -5,7 +5,6 @@
 <p align="center">
 
   <h3 align="center">Maze Builder</h3>
-  <h4 align="center">0r</h4>
   <p align="center">
     Vanilla Javascript
     <br />
