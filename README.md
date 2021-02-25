@@ -8,14 +8,14 @@
   <p align="center">
     Vanilla Javascript
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/danielminhnguyen/maze-game"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://danielminhnguyen.github.io/maze-game/">View Demo</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
+    <a href="https://github.com/danielminhnguyen/maze-game/issues">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
+    <a href="https://github.com/danielminhnguyen/maze-game/issues">Request Feature</a>
   </p>
 </p>
 
@@ -99,7 +99,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Daniel Nguyen - [Email](minhnguyen68@hotmail.com)
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/danielminhnguyen/asd-mission1)
+Project Link: https://github.com/danielminhnguyen/maze-game](https://github.com/danielminhnguyen/maze-game)
 
 <!-- ACKNOWLEDGEMENTS -->
 
