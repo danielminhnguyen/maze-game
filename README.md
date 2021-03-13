@@ -51,8 +51,7 @@
 
 ### Built With
 
-- [node-RED](https://nodered.org)
-- [Watson Assistant](https://www.ibm.com/cloud/watson-assistant)
+- [Vanilla JS]()
 
 <!-- GETTING STARTED -->
 
